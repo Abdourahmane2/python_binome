@@ -5,7 +5,7 @@ import datetime
 import pickle
 from Document import Document
 from Author import Author
-from Corpus import Corpus
+from Corpus import Corpus, SearchEngine
 import pandas as pd
 import re 
 # Initialize Reddit API
@@ -79,10 +79,10 @@ with open("corpus.pkl", "rb") as f:
 
 loaded_corpus.add(Document("bonjour", "moi", "10/10/2024", "URL", "Texte"))
 
-print(type(loaded_corpus))
+"""print(type(loaded_corpus))
 
 print(loaded_corpus.search("football"))
-print(loaded_corpus.concorde("football"))
+print(loaded_corpus.concorde("football"))"""
 
 def nettoyer_texte(texte):
     texte = re.sub(r'\W+', ' ', texte).lower()
@@ -127,12 +127,17 @@ for i , doc in enumerate(loaded_corpus.id2doc.values()):
             document_mot[mot] = {i}
 
 #afficher le nombre de document qui contiennt chaque mot
-for mot, doc in document_mot.items():
-    print(f"Le mot '{mot}' apparait dans {len(doc)} documents")
+"""for mot, doc in document_mot.items():
+    print(f"Le mot '{mot}' apparait dans {len(doc)} documents")"""
 
-#afficher le nombre total de mot dans le corpus
+"""#afficher le nombre total de mot dans le corpus
 print(f"Le nombre total de mots dans le corpus est {sum(occurrences_mots.values())}")
 #afficher le nombre de mot dans vocabulaire
 print(f"Le nombre de mots dans le vocabulaire est {len(doc_vocabulaire)}")
 #afficher le nombre de document dans le corpus
-print(f"Le nombre de document dans le corpus est {len(loaded_corpus.id2doc)}")
+print(f"Le nombre de document dans le corpus est {len(loaded_corpus.id2doc)}")"""
+
+search_engine = SearchEngine(loaded_corpus) 
+#afficher le contenu du dernier document
+print(loaded_corpus.id2doc[165].texte)
+

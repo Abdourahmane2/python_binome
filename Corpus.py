@@ -1,15 +1,20 @@
 import re
 from Author import Author
 import pandas as pd
+import scipy as sp
+import numpy as np
 
 class Corpus  :
     def __init__(self , nom , authors = {}, aut2id = {}, id2doc = {}, ndoc = 0, naut = 0) :
-        self.nom = ""
+        self.nom = nom
         self.authors = {}
         self.aut2id = {}
         self.id2doc = {}
         self.ndoc = 0
         self.naut = 0
+     #afficher le contenu du document
+    
+     
     
     def add(self , doc):
         if doc.auteur not in self.aut2id:
@@ -55,13 +60,93 @@ class Corpus  :
         df = pd.DataFrame(results, columns=['contexte gauche', 'motif trouvé', 'contexte droit'])
         return df
 
-    
+class SearchEngine:
+    def __init__(self, corpus):
+        self.corpus = corpus
+
+    def construire_matrice(self):
+        vocab = {}
+        for doc in self.corpus.id2doc.values():  # Utilisation de self.corpus.id2doc
+            words = doc.texte.split()
+            for word in words:
+                if word not in vocab:
+                    vocab[word] = {
+                        'unique_id': len(vocab),
+                        'total_occurrences': 1
+                    }
+                else:
+                    vocab[word]['total_occurrences'] += 1
+
+        n_doc = len(self.corpus.id2doc)  # Nombre de documents
+        n_mot = len(vocab)  # Nombre de mots dans le vocabulaire
+        ligne, colonne, data = [], [], []
         
-    
+        for i, doc in enumerate(self.corpus.id2doc.values()):
+            words = doc.texte.split()
+            for word in words:
+                if word in vocab:
+                    ligne.append(i)  # Ajouter l'index du document
+                    colonne.append(vocab[word]['unique_id'])  # Index unique du mot
+                    data.append(1)
+
+        # Créer une matrice creuse TF
+        mat_TF = sp.sparse.csr_matrix((data, (ligne, colonne)), shape=(n_doc, n_mot))
         
+        # Calculer les occurrences globales
+        occ_total_corpus = mat_TF.sum()
+        doc_freq = (mat_TF > 0).sum(axis=0)
+
+        # Mettre à jour le vocabulaire avec la fréquence des documents
+        for word in vocab:
+            vocab[word]['doc_freq'] = doc_freq[0, vocab[word]['unique_id']]
+
+        vocab['occ_total_corpus'] = occ_total_corpus
+        return mat_TF, vocab
+
+    def search(self, mots_cles, nbdocument=5):
     
-   
-    
-     
-    
-    
+        # Construire la matrice TF et le vocabulaire
+        mat_TF, vocab = self.construire_matrice()
+
+        # Initialiser le vecteur de la requête
+        query_vector = np.zeros((mat_TF.shape[1]))
+
+        # Construire le vecteur pour chaque mot-clé
+        for word in mots_cles.split():
+            if word in vocab:
+                query_vector[vocab[word]['unique_id']] = 1  
+
+        
+        query_norm = np.linalg.norm(query_vector)
+        if query_norm == 0:
+            return "Aucun mot clé fourni ne se trouve dans le corpus."
+
+        
+        mat_dense = mat_TF.toarray()  
+        doc_norms = np.linalg.norm(mat_dense, axis=1)
+        scores = np.zeros(mat_dense.shape[0])
+
+        for i in range(mat_dense.shape[0]):
+            if doc_norms[i] != 0:
+                scores[i] = mat_dense[i].dot(query_vector) / (doc_norms[i] * query_norm)
+
+        
+        best_docs_indices = np.argsort(scores)[::-1][:nbdocument]
+
+        # Construire les résultats
+        results = []
+        for i in best_docs_indices:
+            if scores[i] > 0:
+                doc = self.corpus.id2doc[i + 1] 
+                matching_words = [
+                    word for word in mots_cles.split()
+                    if word in vocab and mat_dense[i, vocab[word]['unique_id']] > 0
+                ]
+                results.append({
+                    "mot": ", ".join(matching_words),  # Liste des mots correspondants
+                    "document": doc.titre,  # Titre du document
+                    "score": scores[i]  # Score de pertinence
+                })
+
+        # Retourner un DataFrame des résultats
+        return pd.DataFrame(results, columns=["mot", "document", "score"])
