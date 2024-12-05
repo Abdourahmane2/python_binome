@@ -143,10 +143,12 @@ class SearchEngine:
                     if word in vocab and mat_dense[i, vocab[word]['unique_id']] > 0
                 ]
                 results.append({
-                    "mot": ", ".join(matching_words),  # Liste des mots correspondants
-                    "document": doc.titre,  # Titre du document
-                    "score": scores[i]  # Score de pertinence
+                    "mot": ", ".join(matching_words),  
+                    "document": doc.titre,  
+                    "score": scores[i] ,  
+                    "identifiant": i, 
+                    "source du document": doc.type 
                 })
 
         # Retourner un DataFrame des résultats
-        return pd.DataFrame(results, columns=["mot", "document", "score"])
+        return pd.DataFrame(results, columns=["mot", "document", "score" , "identifiant" , "source du document"])

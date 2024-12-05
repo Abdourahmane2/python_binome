@@ -44,7 +44,7 @@ for nature, text, doc in corpus_plus100:
         date = datetime.datetime.fromtimestamp(doc.created_utc).strftime("%Y/%m/%d")
         url = "https://www.reddit.com" + doc.permalink
         texte = doc.selftext.replace("\n", "")
-        doc_classe = Document(titre, auteur, date, url, texte)
+        doc_classe = Document(titre, auteur, date, url, texte , type = "reddit")
         collection.append(doc_classe)
         
     elif nature == "arxiv":
@@ -55,7 +55,7 @@ for nature, text, doc in corpus_plus100:
             authors = doc["author"]["name"]
         summary = doc["summary"].replace("\n", "")
         date = datetime.datetime.strptime(doc["published"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y/%m/%d")
-        doc_classe = Document(titre, authors, date, doc["id"], summary)
+        doc_classe = Document(titre, authors, date, doc["id"], summary , type = "arxiv")
         collection.append(doc_classe)
 
 # Create id2doc mapping
@@ -137,7 +137,5 @@ print(f"Le nombre de mots dans le vocabulaire est {len(doc_vocabulaire)}")
 #afficher le nombre de document dans le corpus
 print(f"Le nombre de document dans le corpus est {len(loaded_corpus.id2doc)}")"""
 
-search_engine = SearchEngine(loaded_corpus) 
-#afficher le contenu du dernier document
-print(loaded_corpus.id2doc[165].texte)
+
 
