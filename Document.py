@@ -1,3 +1,6 @@
+# Description: le fichier contient la classe Document qui est une classe mère pour les classes reditDocuMent et ArxivDocument
+
+
 class Document :
     def __init__(self, titre="", auteur="", date="", url="", texte="" , type = "") :
         self.titre = titre
@@ -11,13 +14,13 @@ class Document :
         return  f"{self.titre} ({self.auteur}, {self.date}) : {self.texte[:50]}..."
      
      
-class reditDocuMent(Document) : 
+class reditDocuMent(Document) :  #classe fille de Document
         def __init__(self, titre="", auteur="", date="", url="", texte="" , nbmessages=0):
             super().__init__(titre, auteur, date, url, texte)
             self.nbmessages = nbmessages
         
         def gettype(self):
-            return "reddit"
+            return "reddit" 
             
         def getnbmessages(self):
             return self.nbmessages
@@ -29,7 +32,7 @@ class reditDocuMent(Document) :
             return f"{super().__str__()} ({self.nbmessages} messages)"
         
         
-class ArxivDocument(Document) :  
+class ArxivDocument(Document) :   #classe fille de Document
         def __init__(self, titre="", auteur="", date="", url="", texte="", coauthors=[]):
             super().__init__(titre, auteur, date, url, texte)
             self.coauthors = coauthors
@@ -40,7 +43,7 @@ class ArxivDocument(Document) :
         def getauthors(self):
             return self.auteur + ", " + ", ".join(self.coauthors)    
         
-        def setcoauthors(self, coauthors):
+        def setcoauthors(self, coauthors): 
             self.coauthors = coauthors   
             
             

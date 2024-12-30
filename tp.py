@@ -8,17 +8,20 @@ from Author import Author
 from Corpus import Corpus, SearchEngine
 import pandas as pd
 import re 
-# Initialize Reddit API
+# appel de l'API Reddit
 reddit = praw.Reddit(client_id='RGNgO8xN9cY2NBCrPipjwQ', client_secret='LePhMMz_Lw4Oya8w5s1D-Yy0eSNGyA', user_agent='ABDOURAHMANE TIMERA')
 
-# Fetch Reddit posts
+
+# recuperer les posts  Reddit et les stocker dans une liste
 hot_posts = reddit.subreddit('football').hot(limit=100)
 texte_redit = []
 for post in hot_posts:
     texte = post.title + " " + post.selftext.replace('\n', '')
-    texte_redit.append(("reddit", texte, post))  # Including post object
+    texte_redit.append(("reddit", texte, post))  
+    
+    
 
-# Fetch Arxiv posts
+# appel de l'API Arxiv et recuperer les articles et les stocker dans une liste
 textes_Arxiv = []
 query = "football"
 url = 'http://export.arxiv.org/api/query?search_query=all:' + query + '&start=0&max_results=100'
@@ -30,12 +33,15 @@ docs = dico['feed']['entry']
 for d in docs:
     texte = d['title'] + ". " + d['summary'].replace("\n", " ")
     textes_Arxiv.append(("arxiv", texte, d))  # Including doc object
+    
+    
 
-# Combine and filter corpus
+#concatenation des deux listes de documents Reddit et Arxiv et filtrage des documents de moins de 100 mots 
 corpus = texte_redit + textes_Arxiv
-corpus_plus100 = [doc for doc in corpus if len(doc[1]) > 100]  # Filter based on text length
+corpus_plus100 = [doc for doc in corpus if len(doc[1]) > 100] 
 
-# Initialize collection and process documents
+
+# Création de la collection de documents
 collection = []
 for nature, text, doc in corpus_plus100:
     if nature == "reddit":
@@ -57,27 +63,29 @@ for nature, text, doc in corpus_plus100:
         date = datetime.datetime.strptime(doc["published"], "%Y-%m-%dT%H:%M:%SZ").strftime("%Y/%m/%d")
         doc_classe = Document(titre, authors, date, doc["id"], summary , type = "arxiv")
         collection.append(doc_classe)
+        
 
-# Create id2doc mapping
+# creer un dictionnaire qui contient les documents de la collection
 id2doc = {i: doc.titre for i, doc in enumerate(collection)}
 
-# Build Corpus
+# construire le corpus avec les documents de la collection  
 corpus = Corpus("mon courpus")
 for doc in collection:
     corpus.add(doc)
 
 
-
+#enregistrer le corpus dans un fichier pour une utilisation future
 with open("corpus.pkl", "wb") as f:
     pickle.dump(corpus, f)
 
-
+#charger le corpus depuis le fichier 
 with open("corpus.pkl", "rb") as f:
     loaded_corpus = pickle.load(f)
     
 
-
+# un document   d'exemple
 loaded_corpus.add(Document("nouveau_doc", "moi", "10/10/2024", "URL", " bonjour je suis un nouveau document d\'exemple ", type = "reddit"))
+
 
 with open("corpus.pkl", "wb") as f:
     pickle.dump(loaded_corpus, f) #enregistrement du corpus modifié
@@ -106,7 +114,7 @@ for i, doc in enumerate(loaded_corpus.id2doc.values()):
 
 occurrences_mots = {}
 
-#compter le nomn=bre d'occurence de chaque mot dans le corpus
+#compter le nombre d'occurence de chaque mot dans le corpus
 for i, doc in enumerate(loaded_corpus.id2doc.values()):
     mots = doc.texte.split()
     for mot in mots:

@@ -12,10 +12,11 @@ class Corpus  :
         self.id2doc = {}
         self.ndoc = 0
         self.naut = 0
-     #afficher le contenu du document
+    
     
      
-    
+     
+    #ajouter un document au corpus
     def add(self , doc):
         if doc.auteur not in self.aut2id:
             self.naut += 1
@@ -59,6 +60,12 @@ class Corpus  :
         
         df = pd.DataFrame(results, columns=['contexte gauche', 'motif trouvé', 'contexte droit'])
         return df
+    
+#-------------------------- 
+# la classe SearchEngine qui permet de rechercher des documents dans un corpus
+# --------------------------------------
+
+
 
 class SearchEngine:
     def __init__(self, corpus):
@@ -151,4 +158,4 @@ class SearchEngine:
                 })
 
         # Retourner un DataFrame des résultats
-        return pd.DataFrame(results, columns=["mot", "document", "score" , "identifiant" , "source du document"])
+        return pd.DataFrame(results, columns=["mot_cle", " titre_document", "score" , "identifiant" , "source du document"])
