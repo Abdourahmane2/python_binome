@@ -77,7 +77,11 @@ with open("corpus.pkl", "rb") as f:
     
 
 
-loaded_corpus.add(Document("bonjour", "moi", "10/10/2024", "URL", "Texte"))
+loaded_corpus.add(Document("nouveau_doc", "moi", "10/10/2024", "URL", " bonjour je suis un nouveau document d\'exemple ", type = "reddit"))
+
+with open("corpus.pkl", "wb") as f:
+    pickle.dump(loaded_corpus, f) #enregistrement du corpus modifié
+
 
 """print(type(loaded_corpus))
 
@@ -136,6 +140,9 @@ print(f"Le nombre total de mots dans le corpus est {sum(occurrences_mots.values(
 print(f"Le nombre de mots dans le vocabulaire est {len(doc_vocabulaire)}")
 #afficher le nombre de document dans le corpus
 print(f"Le nombre de document dans le corpus est {len(loaded_corpus.id2doc)}")"""
+
+#afficher le dernier document du corpus
+print(list(loaded_corpus.id2doc.values())[-1])
 
 
 

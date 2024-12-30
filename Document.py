@@ -8,7 +8,7 @@ class Document :
         self.type = type
         
     def __str__(self):
-        return f"{self.titre}, par {self.auteur}"
+        return  f"{self.titre} ({self.auteur}, {self.date}) : {self.texte[:50]}..."
      
      
 class reditDocuMent(Document) : 
