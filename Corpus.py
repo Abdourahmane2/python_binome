@@ -10,12 +10,12 @@ import numpy as np
 
 class Corpus  :
     def __init__(self , nom , authors = {}, aut2id = {}, id2doc = {}, ndoc = 0, naut = 0) :
-        self.nom = nom
-        self.authors = {}
-        self.aut2id = {}
-        self.id2doc = {}
-        self.ndoc = 0
-        self.naut = 0
+        self.nom = nom #nom du corpus
+        self.authors = {} # auteurs du corpus
+        self.aut2id = {}  # dictionnaire qui associe un auteur à un identifiant
+        self.id2doc = {} # dictionnaire qui associe un identifiant à un document
+        self.ndoc = 0 #nombre de documents dans le corpus
+        self.naut = 0 #nombre d'auteurs dans le corpus
     
     
      
@@ -115,59 +115,44 @@ class SearchEngine:
         return mat_TF, vocab
 
     def search(self, mots_cles, nbdocument=5):
-    
-        # Construire la matrice TF et le vocabulaire
-        mat_TF, vocab = self.construire_matrice()
+        # Créer une représentation textuelle unifiée pour chaque document
+        unified_corpus = []
+        for doc in self.corpus.id2doc.values():
+            # Concaténer titre, auteur et texte
+            full_text = f"{doc.titre.lower()} {doc.auteur.lower()} {doc.texte.lower()}"
+            unified_corpus.append(full_text)
 
-        # Initialiser le vecteur de la requête
-        query_vector = np.zeros((mat_TF.shape[1]))
+        # Initialiser les scores pour chaque document
+        scores = np.zeros(len(unified_corpus))
 
-        # Construire le vecteur pour chaque mot-clé
-        for word in mots_cles.split():
-            if word in vocab:
-                query_vector[vocab[word]['unique_id']] = 1  
+        # Préparer les mots-clés
+        mots_cles_lower = mots_cles.lower().split()
 
-        
-        query_norm = np.linalg.norm(query_vector)
-        if query_norm == 0:
-            return "Aucun mot clé fourni ne se trouve dans le corpus."
+        # Calcul des scores
+        for idx, full_text in enumerate(unified_corpus):
+            for word in mots_cles_lower:
+                if word in full_text:
+                    scores[idx] += full_text.count(word)  # Comptage des occurrences
 
-        
-        mat_dense = mat_TF.toarray()  
-        doc_norms = np.linalg.norm(mat_dense, axis=1)
-        scores = np.zeros(mat_dense.shape[0])
-
-        for i in range(mat_dense.shape[0]):
-            if doc_norms[i] != 0:
-                scores[i] = mat_dense[i].dot(query_vector) / (doc_norms[i] * query_norm)
-
-        
+        # Trier les documents par pertinence
         best_docs_indices = np.argsort(scores)[::-1][:nbdocument]
 
         # Construire les résultats
         results = []
         for i in best_docs_indices:
             if scores[i] > 0:
-                doc = self.corpus.id2doc[i + 1] 
-                matching_words = [
-                    word for word in mots_cles.split()
-                    if word in vocab and mat_dense[i, vocab[word]['unique_id']] > 0
-                ]
+                doc = self.corpus.id2doc[i + 1]
+                matching_words = [word for word in mots_cles_lower if word in unified_corpus[i]]
                 results.append({
-                    "mot_cle": ", ".join(matching_words),  
-                    "titre_document": doc.titre,  
-                    "score": scores[i] ,  
-                    "identifiant": i, 
-                    "source du document": doc.type ,
+                    "mot_cle": ", ".join(matching_words),
+                    "titre_document": doc.titre,
+                    "auteur": doc.auteur,
+                    "score": scores[i],
+                    "identifiant": i,
+                    "source_du_document": doc.type,
                     "lien": doc.url
                 })
-                
-                # Retourner un DataFrame des résultats
-                df = pd.DataFrame(results, columns=["mot_cle", "titre_document", "score" , "identifiant" , "source du document"  ,"lien"])
-                
-               
 
-        
-        return df
-    
-
+        # Retourner les résultats sous forme de DataFrame
+        df = pd.DataFrame(results, columns=["mot_cle", "titre_document", "auteur", "score", "identifiant", "source_du_document", "lien"])
+        return df if not df.empty else "Aucun document ne correspond aux mots-clés."

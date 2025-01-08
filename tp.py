@@ -7,7 +7,8 @@ from Document import Document
 from Author import Author
 from Corpus import Corpus, SearchEngine
 import pandas as pd
-import re 
+import re  
+
 # appel de l'API Reddit
 reddit = praw.Reddit(client_id='RGNgO8xN9cY2NBCrPipjwQ', client_secret='LePhMMz_Lw4Oya8w5s1D-Yy0eSNGyA', user_agent='ABDOURAHMANE TIMERA')
 
@@ -30,6 +31,7 @@ data = url_read.decode()
 dico = xmltodict.parse(data)
 docs = dico['feed']['entry']
 
+#
 for d in docs:
     texte = d['title'] + ". " + d['summary'].replace("\n", " ")
     textes_Arxiv.append(("arxiv", texte, d))  # Including doc object
@@ -142,15 +144,15 @@ for i , doc in enumerate(loaded_corpus.id2doc.values()):
 """for mot, doc in document_mot.items():
     print(f"Le mot '{mot}' apparait dans {len(doc)} documents")"""
 
-"""#afficher le nombre total de mot dans le corpus
+#afficher le nombre total de mot dans le corpus
 print(f"Le nombre total de mots dans le corpus est {sum(occurrences_mots.values())}")
 #afficher le nombre de mot dans vocabulaire
 print(f"Le nombre de mots dans le vocabulaire est {len(doc_vocabulaire)}")
 #afficher le nombre de document dans le corpus
-print(f"Le nombre de document dans le corpus est {len(loaded_corpus.id2doc)}")"""
+print(f"Le nombre de document dans le corpus est {len(loaded_corpus.id2doc)}")
 
 #afficher le dernier document du corpus
-print(list(loaded_corpus.id2doc.values())[-1])
+#print(list(loaded_corpus.id2doc.values())[-1])
 
 
 
