@@ -4,6 +4,10 @@ import pandas as pd
 import scipy as sp
 import numpy as np
 
+#--------------------------
+# la classe Document qui est une classe mère pour les classes reditDocuMent et ArxivDocument
+# --------------------------------------
+
 class Corpus  :
     def __init__(self , nom , authors = {}, aut2id = {}, id2doc = {}, ndoc = 0, naut = 0) :
         self.nom = nom
@@ -61,11 +65,11 @@ class Corpus  :
         df = pd.DataFrame(results, columns=['contexte gauche', 'motif trouvé', 'contexte droit'])
         return df
     
+    
+    
 #-------------------------- 
 # la classe SearchEngine qui permet de rechercher des documents dans un corpus
 # --------------------------------------
-
-
 
 class SearchEngine:
     def __init__(self, corpus):
@@ -150,12 +154,20 @@ class SearchEngine:
                     if word in vocab and mat_dense[i, vocab[word]['unique_id']] > 0
                 ]
                 results.append({
-                    "mot": ", ".join(matching_words),  
-                    "document": doc.titre,  
+                    "mot_cle": ", ".join(matching_words),  
+                    "titre_document": doc.titre,  
                     "score": scores[i] ,  
                     "identifiant": i, 
-                    "source du document": doc.type 
+                    "source du document": doc.type ,
+                    "lien": doc.url
                 })
+                
+                # Retourner un DataFrame des résultats
+                df = pd.DataFrame(results, columns=["mot_cle", "titre_document", "score" , "identifiant" , "source du document"  ,"lien"])
+                
+               
 
-        # Retourner un DataFrame des résultats
-        return pd.DataFrame(results, columns=["mot_cle", " titre_document", "score" , "identifiant" , "source du document"])
+        
+        return df
+    
+
